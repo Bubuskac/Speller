@@ -43,6 +43,7 @@
                         if (json.previous.length == 0) {
                             $("#previous").html(json.previous);
                         } else {
+                            $("#previous").html("")
                             for (var i = 0; i < json.previous.length; i++) {
                                 $("#previous").html($("#previous").html() + "<br>" + json.previous[i]);
                             }
