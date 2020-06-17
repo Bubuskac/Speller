@@ -60,11 +60,10 @@ def dictionary_remove(word):
 @app.route("/start/<name>/<count>/<test_type>")
 def start_test(name, count, test_type):
     words = load_file(WORD_DICTIONARY)
+    if out_of_range(words, count):
+        return json.dumps({"result": "0 out of 0"})
     test_id = "{}{}{}".format(name, count, time.time())
-    test_words = []
-    all_words = words["ly"] + words["j"]
-    while len(test_words) < int(count):
-        test_words.append(all_words.pop(random.randrange(0, len(all_words))))
+    test_words = create_word_list(words, count)
     init_session(name, count, test_type)
     return get_next_word(test_words, test_id)
     
@@ -86,6 +85,12 @@ def next_word(test_id, word, answer):
             "{} times failed".format(session['faults']), "previous": results})
     return get_next_word(test_words, test_id)
     
+def create_word_list(words, count): 
+    test_words = []
+    all_words = words["ly"] + words["j"]
+    while len(test_words) < int(count):
+        test_words.append(all_words.pop(random.randrange(0, len(all_words))))
+    return test_words
 
 def get_next_word(test_words, test_id):
     word = test_words[0]
@@ -138,3 +143,6 @@ def remove_word(words, word, letter):
     if letter in word:
         words[letter].remove(word.replace(letter, "*"))
     return words
+    
+def out_of_range(words, count):
+    return int(count) < 1 or int(count) > len(words["ly"])  + len(words["j"])

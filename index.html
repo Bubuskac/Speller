@@ -61,17 +61,19 @@
             
             $('#start').click(function() {
                 var data = {"name": "", "count": ""};
-                $('#start').hide();
-                $("#result").hide();
-                $('#name').attr("disabled", "disabled");
-                $('#count').attr("disabled", "disabled");
                 data.name = $('#name').val();
                 data.count = $('#count').val();
                 data.type = $("#normal").prop('checked') ? 'normal' : 'recurring'
                 $.getJSON("/start/" + data.name + "/" + data.count + "/" + data.type, "", function (json) {
-                    $("#word").html(json.word);
-                    id = json.id;
-                    $("#test").show();
+                    if (json.word) {
+                        $("#word").html(json.word);
+                        id = json.id;
+                        $("#test").show();
+                        $('#start').hide();
+                        $("#result").hide();
+                        $('#name').attr("disabled", "disabled");
+                        $('#count').attr("disabled", "disabled");
+                    }
                 });
             });
             $('#j').click(function() {
