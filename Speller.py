@@ -27,27 +27,35 @@ def show_list():
     count_obj = { "count": len(words["ly"])  + len(words["j"])}
     return json.dumps(count_obj)
     
-@app.route("/start/<name>/<count>")
-def start_test(name, count):
+@app.route("/start/<name>/<count>/<test_type>")
+def start_test(name, count, test_type):
     words = load_file(WORD_DICTIONARY)
     test_id = "{}{}{}".format(name, count, time.time())
     test_words = []
     all_words = words["ly"] + words["j"]
     while len(test_words) < int(count):
         test_words.append(all_words.pop(random.randrange(0, len(all_words))))
-    init_session(name, count)
+    init_session(name, count, test_type)
     return get_next_word(test_words, test_id)
     
 @app.route("/next/<test_id>/<word>/<answer>")
 def next_word(test_id, word, answer):
     test_words = load_file(test_id)
-    session['points'] += 1 if check_answer(word, answer) else 0 
+    if session['type'] == 'normal':
+        session['points'] += 1 if check_answer(word, answer) else 0
+    else:
+        if not check_answer(word, answer):
+            session['faults'] += 1
+            test_words.append(word) 
     if len(test_words) == 0:
         os.remove(test_id) 
         result_file_name = store_result()
         result = load_file(result_file_name)
         result.pop(0)
-        return json.dumps({"result": "{} out of {}".format(session['points'], session['count']), "previous": result})
+        if session['type'] == 'normal':
+            return json.dumps({"result": "{} out of {}".format(session['points'], session['count']), "previous": result})
+        else:
+            return json.dumps({"result": "{} times failed".format(session['faults']), "previous": result})
     return get_next_word(test_words, test_id)
     
 
@@ -66,10 +74,12 @@ def check_answer(word, answer):
     words = load_file(WORD_DICTIONARY)[answer]
     return word in words
 
-def init_session(name, count):
+def init_session(name, count, test_type):
     session['points'] = 0
+    session['faults'] = 0
     session['name'] = name
     session['count'] = count
+    session['type'] = test_type
     
 def store_result():
     result_file_name = "{}.res".format(session['name'])
@@ -77,7 +87,10 @@ def store_result():
         results = load_file(result_file_name)
     except:
         results = []
-    results.insert(0, "{} out of {}".format(session['points'], session['count']))
+    if session['type'] == 'normal':
+        results.insert(0, "{} out of {}".format(session['points'], session['count']))
+    else:
+        results.insert(0, "{} times failed".format(session['faults']))
     with open(result_file_name, 'w', encoding="utf-8") as f:
         json.dump(results, f, ensure_ascii=False)
     return result_file_name

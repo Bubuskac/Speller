@@ -66,7 +66,8 @@
                 $('#count').attr("disabled", "disabled");
                 data.name = $('#name').val();
                 data.count = $('#count').val();
-                $.getJSON("/start/" + data.name + "/" + data.count, "", function (json) {
+                data.type = $("#normal").prop('checked') ? 'normal' : 'recurring'
+                $.getJSON("/start/" + data.name + "/" + data.count + "/" + data.type, "", function (json) {
                     $("#word").html(json.word);
                     id = json.id;
                     $("#test").show();
