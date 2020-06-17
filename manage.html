@@ -33,7 +33,7 @@
             
             $('#addWord').click(function() {
                 $.getJSON("/dictionary/add/" + $('#word').val(), "", function (json) {
-                    $('#name').val("");
+                    $('#word').val("");
                     $("#list").html($("#list").html() + "<li>" + json.word
                         + " <button onclick=\"remove('" + json.word + "')\">delete</button></li>");
                 });

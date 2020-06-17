@@ -37,27 +37,23 @@ def show_list():
 def dictionary():
     words = load_file(WORD_DICTIONARY)
     result = {"words": []}
-    result = add_words(result, words, "ly")
-    result = add_words(result, words, "j")
+    add_words(result, words, "ly")
+    add_words(result, words, "j")
     return json.dumps(result)
     
 @app.route("/dictionary/add/<word>")
 def dictionary_add(word):
     words = load_file(WORD_DICTIONARY)
-    if "ly" in word:
-        words["ly"].append(word.replace("ly", "*"))
-    if "j" in word:
-        words["j"].append(word.replace("j", "*"))
+    add_word(words, word, "ly")
+    add_word(words, word, "j")
     write_file(WORD_DICTIONARY, words)
     return json.dumps({"word": word})
     
 @app.route("/dictionary/delete/<word>")
 def dictionary_remove(word):
     words = load_file(WORD_DICTIONARY)
-    if "ly" in word:
-        words["ly"].remove(word.replace("ly", "*"))
-    if "j" in word:
-        words["j"].remove(word.replace("j", "*"))
+    remove_word(words, word, "lY")
+    remove_word(words, word, "j")
     write_file(WORD_DICTIONARY, words)
     return dictionary()
     
@@ -132,3 +128,13 @@ def add_words(result, words, letter):
     for word in words[letter]:
         result["words"].append(word.replace("*", letter))
     return result
+
+def add_word(words, word, letter):
+    if letter in word:
+        words[letter].append(word.replace(letter, "*"))
+    return words
+    
+def remove_word(words, word, letter):
+    if letter in word:
+        words[letter].remove(word.replace(letter, "*"))
+    return words
