@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Ly and J spelling test</title>
+        <meta charset="utf-8">
+        <script src="js/jquery-3.5.1.min.js"></script>
+    </head>
+    <body onLoad="loadCount()">
+        <h1>Hungarian Ly and J spelling test</h1>
+        <p>Please set your name and choose how many words you would like to be asked</p>
+        <label for="name">Enter you name here:</label>
+            <input type="text" id="name" name="name">
+        <label for="count">Select a number from 1 to <span id="counter"></span></label>
+            <input type="text" id="count" name="count">
+        <label for="normal">Normal test</label>
+            <input type="radio" value="normal" name="type" id="normal" checked="checked">
+        <label for="reccuring">Ask until all correct</label>
+            <input type="radio" value="reccuring" name="type" id="reccuring">
+        <button id="start">Start!</button>
+        <div id="test">
+            <p>Which letter is used in the word: <strong id="word"></strong>?</p>
+            <button id="j">j</button>
+            <button id="ly">ly</button>
+        </div>
+        <div id="result">
+            <p>Your result is: <span id="score"></span></p>
+            <p>Previous results: <span id="previous"></span></p>
+        </div>
+        <script>
+            var id = "";
+            function loadCount() {
+                $.getJSON("/count", "", function (json) {
+                    $("#counter").html(json.count);
+                });
+                $("#test").hide();
+                $("#result").hide();
+            }
+            
+            function next(answer) {
+                $.getJSON("/next/" + id + "/" + $("#word").html() + "/" + answer, "", function (json) {
+                    if (json.result) {
+                        $("#score").html(json.result);
+                        if (json.previous.length == 0) {
+                            $("#previous").html(json.previous);
+                        } else {
+                            for (var i = 0; i < json.previous.length; i++) {
+                                $("#previous").html($("#previous").html() + "<br>" + json.previous[i]);
+                            }
+                        }
+                        $("#test").hide();
+                        $("#result").show();
+                        $("#start").show();
+                        $('#name').removeAttr("disabled");
+                        $('#count').removeAttr("disabled");
+                    } else {
+                        $("#word").html(json.word);
+                    }
+                });
+            }
+            
+            $('#start').click(function() {
+                var data = {"name": "", "count": ""};
+                $('#start').hide();
+                $("#result").hide();
+                $('#name').attr("disabled", "disabled");
+                $('#count').attr("disabled", "disabled");
+                data.name = $('#name').val();
+                data.count = $('#count').val();
+                $.getJSON("/start/" + data.name + "/" + data.count, "", function (json) {
+                    $("#word").html(json.word);
+                    id = json.id;
+                    $("#test").show();
+                });
+            });
+            $('#j').click(function() {
+                next('j');
+            });
+            $('#ly').click(function() {
+                next('ly');
+            });
+            
+        </script>
+    </body>
+</html>
