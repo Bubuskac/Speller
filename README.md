@@ -10,12 +10,14 @@ How to run:
         open a command line
         "export FLASK_APP=hello.py"
         "flask run"
-        Open a "http://localhost:5000/" address in a browser
+        Open "http://localhost:5000/" address in a browser
     On windows systems
         open a command line
         "set FLASK_APP=Speller.py && flask run"
-        Open a "http://localhost:5000/" address in a browser
+        Open "http://localhost:5000/" address in a browser
         
 How to test:
     in command line run:
         "python TestSpeller.py"
+
+You can use "http://localhost:5000/manage" to manage the words

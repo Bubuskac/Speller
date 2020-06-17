@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Ly and J spelling manage words</title>
+        <meta charset="utf-8">
+        <script src="js/jquery-3.5.1.min.js"></script>
+    </head>
+    <body onLoad="loadWords()">
+        <h1>Manage the words</h1>
+        <ul id="list"></ul>
+        <label for="word">new word:</label>
+            <input type="text" id="word" name="word">
+        <button id="addWord">Add new word</button>
+        <script>
+           function loadWords() {
+                $.getJSON("/dictionary", "", function (json) {
+                    for (var i = 0; i < json.words.length; i++) {
+                        $("#list").html($("#list").html() + "<li>" + json.words[i]
+                            + " <button onclick=\"remove('" + json.words[i] + "')\">delete</button></li>");
+                    }
+                });
+            }
+            
+            function remove(word) {
+                $.getJSON("/dictionary/delete/" + word, "", function (json) {
+                    $("#list").html("")
+                    for (var i = 0; i < json.words.length; i++) {
+                        $("#list").html($("#list").html() + "<li>" + json.words[i]
+                            + " <button onclick=\"remove('" + json.words[i] + "')\">delete</button></li>");
+                    }
+                });
+            }
+            
+            $('#addWord').click(function() {
+                $.getJSON("/dictionary/add/" + $('#word').val(), "", function (json) {
+                    $('#name').val("");
+                    $("#list").html($("#list").html() + "<li>" + json.word
+                        + " <button onclick=\"remove('" + json.word + "')\">delete</button></li>");
+                });
+            });
+        </script>
+    </body>
+</html>

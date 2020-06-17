@@ -14,6 +14,12 @@ def index():
     with open("index.html", "r") as f:
         html = f.read()
     return html
+
+@app.route("/manage")
+def manage():
+    with open("manage.html", "r") as f:
+        html = f.read()
+    return html
     
 @app.route("/js/<jsFile>")
 def get_JQuery(jsFile):
@@ -26,6 +32,34 @@ def show_list():
     words = load_file(WORD_DICTIONARY)
     count_obj = { "count": len(words["ly"])  + len(words["j"])}
     return json.dumps(count_obj)
+
+@app.route("/dictionary")
+def dictionary():
+    words = load_file(WORD_DICTIONARY)
+    result = {"words": []}
+    result = add_words(result, words, "ly")
+    result = add_words(result, words, "j")
+    return json.dumps(result)
+    
+@app.route("/dictionary/add/<word>")
+def dictionary_add(word):
+    words = load_file(WORD_DICTIONARY)
+    if "ly" in word:
+        words["ly"].append(word.replace("ly", "*"))
+    if "j" in word:
+        words["j"].append(word.replace("j", "*"))
+    write_file(WORD_DICTIONARY, words)
+    return json.dumps({"word": word})
+    
+@app.route("/dictionary/delete/<word>")
+def dictionary_remove(word):
+    words = load_file(WORD_DICTIONARY)
+    if "ly" in word:
+        words["ly"].remove(word.replace("ly", "*"))
+    if "j" in word:
+        words["j"].remove(word.replace("j", "*"))
+    write_file(WORD_DICTIONARY, words)
+    return dictionary()
     
 @app.route("/start/<name>/<count>/<test_type>")
 def start_test(name, count, test_type):
@@ -69,7 +103,7 @@ def load_file(file_name):
         
 def write_file(file_name, content):
     with open(file_name, 'w', encoding="utf-8") as f:
-        json.dump(content, f, ensure_ascii=False)
+        json.dump(content, f, ensure_ascii=False, indent=4)
         
 def check_answer(word, answer):
     words = load_file(WORD_DICTIONARY)[answer]
@@ -93,3 +127,8 @@ def store_result():
         "{} times failed".format(session['faults']))
     write_file(result_file_name, results)
     return results
+
+def add_words(result, words, letter):
+    for word in words[letter]:
+        result["words"].append(word.replace("*", letter))
+    return result

@@ -25,6 +25,24 @@ class SpellerTests(unittest.TestCase):
         
         self.assertEqual(result.data, b'{"count": 2}')
         
+    def test_dictionary(self):
+        result = self.app.get("/dictionary")
+        
+        self.assertEqual(result.data, b'{"words": ["lyuk", "juh"]}')
+    
+    def test_dictionary_add_remove(self):
+        result = self.app.get("/dictionary/add/faj")
+        
+        self.assertEqual(result.data, b'{"word": "faj"}')
+        
+        result = self.app.get("/dictionary")
+        
+        self.assertEqual(result.data, b'{"words": ["lyuk", "juh", "faj"]}')
+        
+        result = self.app.get("/dictionary/delete/faj")
+        
+        self.assertEqual(result.data, b'{"words": ["lyuk", "juh"]}')
+        
     def test_start(self):
         result = self.app.get("/start/test/2/normal")
 
