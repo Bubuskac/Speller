@@ -8,7 +8,7 @@ Dependencies:
 How to run:
     On unix based systems:
         open a command line
-        "export FLASK_APP=hello.py"
+        "export FLASK_APP=Speller.py"
         "flask run"
         Open "http://localhost:5000/" address in a browser
     On windows systems
