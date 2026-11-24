@@ -11,7 +11,7 @@ app.secret_key = 'árvíztükörfúrógép'
 
 WORD_DICTIONARY = "words.json"
 
-dictionary = Dictionary()
+dictionary = Dictionary(WORD_DICTIONARY)
 
 @app.route("/")
 def index():

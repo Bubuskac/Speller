@@ -2,10 +2,11 @@ import json
 import Io
 
 class Dictionary:
-    WORD_DICTIONARY = "words.json"
+    WordDictionary = None
 
-    def __init__(self):
-        self.words = Io.load_file(self.WORD_DICTIONARY)
+    def __init__(self, file):
+        self.WordDictionary = file
+        self.words = Io.load_file(self.WordDictionary)
         
     def add_words(self, result, words, letter):
         for word in words[letter]:
@@ -39,10 +40,10 @@ class Dictionary:
     def save_word(self, word):
         self.words = self.add_word(self.words, word, "ly")
         self.words = self.add_word(self.words, word, "j")
-        Io.write_file(self.WORD_DICTIONARY, self.words)
+        Io.write_file(self.WordDictionary, self.words)
         return json.dumps({"word": word})
     
     def delete_word(self, word):
         self.words = self.remove_word(self.words, word, "ly")
         self.words = self.remove_word(self.words, word, "j")
-        Io.write_file(self.WORD_DICTIONARY, self.words)
+        Io.write_file(self.WordDictionary, self.words)
