@@ -98,6 +98,16 @@ class SpellerTests(unittest.TestCase):
         
         self.assertEqual(result.data, b'{"result": "0 times failed", "previous": ["1 times failed"]}', "Result Failed")
 
+    def test_error_word(self):
+        result = self.app.get("/word/test21/1")
+
+        self.assertEqual(result.data, b'{"error": "Failed to load test"}')
+
+    def test_error_answer(self):
+        result = self.app.get("/answer/test21/1/j")
+
+        self.assertEqual(result.data, b'{"error": "Failed to load test"}')
+
 if __name__ == '__main__':
     dictionary = Dictionary("test_words.json")
     with patch("Speller.dictionary", dictionary):        
