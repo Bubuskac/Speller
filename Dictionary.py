@@ -43,6 +43,6 @@ class Dictionary:
         return json.dumps({"word": word})
     
     def delete_word(self, word):
-        self.words = self.remove_word(self.words, word, "lY")
+        self.words = self.remove_word(self.words, word, "ly")
         self.words = self.remove_word(self.words, word, "j")
         Io.write_file(self.WORD_DICTIONARY, self.words)

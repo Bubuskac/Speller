@@ -28,16 +28,36 @@
         </div>
         <script>
             var id = "";
+            var current = 0;
             function loadCount() {
                 $.getJSON("/count", "", function (json) {
                     $("#counter").html(json.count);
                 });
                 $("#test").hide();
                 $("#result").hide();
+                $("#start").show();
+                $('#name').removeAttr("disabled");
+                $('#count').removeAttr("disabled");
             }
             
-            function next(answer) {
-                $.getJSON("/next/" + id + "/" + $("#word").html() + "/" + answer, "", function (json) {
+            function next(num) {
+                $.getJSON("/word/" + id + "/" + num, "", function (json) {
+                    if (json.error) {
+                        alert(json.error);
+                        loadCount();
+                        return;
+                    }
+                    $("#word").html(json.word); 
+                });
+            }
+
+            function answer(answer) {
+                $.getJSON("/answer/" + id + "/" + current + "/" + answer, "", function (json) {
+                    if (json.error) {
+                        alert(json.error);
+                        loadCount();
+                        return;
+                    }
                     if (json.result) {
                         $("#score").html(json.result);
                         if (json.previous.length == 0) {
@@ -54,12 +74,14 @@
                         $('#name').removeAttr("disabled");
                         $('#count').removeAttr("disabled");
                     } else {
-                        $("#word").html(json.word);
+                        current += 1;
+                        next(current); 
                     }
                 });
             }
             
             $('#start').click(function() {
+                current = 0;
                 var data = {"name": "", "count": ""};
                 data.name = $('#name').val();
                 data.count = $('#count').val();
@@ -77,10 +99,10 @@
                 });
             });
             $('#j').click(function() {
-                next('j');
+                answer('j');
             });
             $('#ly').click(function() {
-                next('ly');
+                answer('ly');
             });
             
         </script>

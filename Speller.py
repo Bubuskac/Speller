@@ -56,38 +56,67 @@ def start_test(name, count, test_type):
     test_id = "{}{}{}".format(name, count, time.time())
     test_words = create_word_list(words, count)
     init_session(name, count, test_type)
-    return get_next_word(test_words, test_id)
-    
-@app.route("/next/<test_id>/<word>/<answer>")
-def next_word(test_id, word, answer):
-    test_words = Io.load_file(test_id)
-    if session['type'] == 'normal':
-        session['points'] += 1 if check_answer(word, answer) else 0
+    Io.write_file(test_id, test_words)
+    return get_word_at(test_words, test_id, 0)
+
+@app.route("/word/<test_id>/<num>")
+def word(test_id, num):
+    try:
+        test_words = Io.load_file(test_id)
+    except Exception as e:
+        return json.dumps({"error": "Failed to load test"})
+    if (int(num) < len(test_words)):
+        return get_word_at(test_words, test_id, int(num))
+    n = get_first_error(test_words)
+    if n != -1:
+        return get_word_at(test_words, test_id, n)
+    return json.dumps({"error": "You found a bug!"})
+
+@app.route("/answer/<test_id>/<num>/<answer>")
+def answer(test_id, num, answer):
+    try:
+        test_words = Io.load_file(test_id)
+    except Exception as e:
+        return json.dumps({"error": "Failed to load test"})
+    if (int(num) < len(test_words)):
+        word = json.loads(get_word_at(test_words, test_id, int(num)))
     else:
-        if not check_answer(word, answer):
+        num = get_first_error(test_words)
+        if (num == -1):
+            return json.dumps({"error": "You found the bug!"})
+        word = json.loads(get_word_at(test_words, test_id, num))
+    correct = 0
+    if session['type'] == 'normal':
+        if check_answer(word["word"], answer):
+            session['points'] += 1
+            correct = 1
+    else:
+        if not check_answer(word["word"], answer):
             session['faults'] += 1
-            test_words.append(word) 
-    if len(test_words) == 0:
+        else:
+            correct = 1
+    test_words[int(num)][1] = correct
+    test_words[int(num)][2] += 1
+    Io.write_file(test_id, test_words)
+    if test_finished(test_words, session['type']):
         os.remove(test_id) 
         results = store_result()
         results.pop(0)
         return json.dumps({"result": "{} out of {}".format(session['points'], session['count'])
             if session['type'] == 'normal' else
             "{} times failed".format(session['faults']), "previous": results})
-    return get_next_word(test_words, test_id)
+    return get_word_at(test_words, test_id, int(num))
     
 def create_word_list(words, count): 
     test_words = []
     all_words = words["ly"] + words["j"]
     while len(test_words) < int(count):
-        test_words.append(all_words.pop(random.randrange(0, len(all_words))))
+        test_words.append([all_words.pop(random.randrange(0, len(all_words))), 0, 0])
     return test_words
 
-def get_next_word(test_words, test_id):
-    word = test_words[0]
-    test_words.pop(0)
-    Io.write_file(test_id, test_words)
-    return json.dumps({"word": word, "id": test_id}, ensure_ascii=False)
+def get_word_at(test_words, test_id, num):
+    word = test_words[num]
+    return json.dumps({"word": word[0], "id": test_id}, ensure_ascii=False)
         
 def check_answer(word, answer):
     words = dictionary.get_words()[answer]
@@ -99,7 +128,19 @@ def init_session(name, count, test_type):
     session['name'] = name
     session['count'] = count
     session['type'] = test_type
-    
+
+def test_finished(test_words, type):
+    guessed = 0
+    all_correct = True
+    for n in range(0, len(test_words)):
+        if (test_words[n][2] > 0):
+            guessed += 1
+        all_correct = all_correct and test_words[n][1] == 1
+    if guessed == len(test_words) and type == 'normal':
+        return True
+    return all_correct
+
+
 def store_result():
     result_file_name = "{}.res".format(session['name'])
     try:
@@ -114,3 +155,11 @@ def store_result():
     
 def out_of_range(words, count):
     return int(count) < 1 or int(count) > len(words["ly"])  + len(words["j"])
+
+def get_first_error(test_words):
+    n = 0
+    while n < len(test_words):
+        if (test_words[n][1] != 1):
+            return n
+        n += 1
+    return -1
