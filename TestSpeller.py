@@ -21,7 +21,7 @@ class SpellerTests(unittest.TestCase):
             os.remove("test.res")
 
     def test_count(self):
-        result = self.app.get("/count")
+        result = self.app.get("/dictionary/count")
         
         self.assertEqual(result.data, b'{"count": 2}')
         
@@ -44,67 +44,67 @@ class SpellerTests(unittest.TestCase):
         self.assertEqual(result.data, b'{"words": ["lyuk", "juh"]}')
         
     def test_start(self):
-        result = self.app.get("/start/test/2/normal")
+        result = self.app.get("/test/start/test/2/normal")
 
         self.assertEqual(result.data, b'{"word": "*uk", "id": "test21"}')
         
     def test_word(self):
-        self.app.get("/start/test/2/normal")
+        self.app.get("/test/start/test/2/normal")
 
-        result = self.app.get("/word/test21/0")
+        result = self.app.get("/test/test21/word/0")
                 
         self.assertEqual(result.data, b'{"word": "*uk", "id": "test21"}', "Word Failed")
 
-        result = self.app.get("/word/test21/1")
+        result = self.app.get("/test/test21/word/1")
         
         self.assertEqual(result.data, b'{"word": "*uh", "id": "test21"}', "Word Failed")
     
     def test_faulty_answer(self):
-        self.app.get("/start/test/2/normal")
-        self.app.get("/answer/test21/0/j")
-        result = self.app.get("/answer/test21/1/j")
+        self.app.get("/test/start/test/2/normal")
+        self.app.get("/test/test21/word/0/answer/j")
+        result = self.app.get("/test/test21/word/1/answer/j")
 
         self.assertEqual(result.data, b'{"result": "1 out of 2", "previous": []}', "Result Failed")
         
     def test_result(self):
-        self.app.get("/start/test/2/normal")
-        self.app.get("/answer/test21/0/j")
-        self.app.get("/answer/test21/1/j")
-        self.app.get("/start/test/1/normal")
-        result = self.app.get("/answer/test11/0/ly")
+        self.app.get("/test/start/test/2/normal")
+        self.app.get("/test/test21/word/0/answer/j")
+        self.app.get("/test/test21/word/1/answer/j")
+        self.app.get("/test/start/test/1/normal")
+        result = self.app.get("/test/test11/word/0/answer/ly")
 
         self.assertEqual(result.data, b'{"result": "1 out of 1", "previous": ["1 out of 2"]}', "Result Failed")
 
     def test_recurring(self):
-        self.app.get("/start/test/1/recurring")
-        result = self.app.get("/answer/test11/0/j")
+        self.app.get("/test/start/test/1/recurring")
+        result = self.app.get("/test/test11/word/0/answer/j")
         
         self.assertEqual(result.data, b'{"word": "*uk", "id": "test11"}', "Answer Failed")
         
-        result = self.app.get("/answer/test11/0/j")
+        result = self.app.get("/test/test11/word/0/answer/j")
         
         self.assertEqual(result.data, b'{"word": "*uk", "id": "test11"}', "Answer Failed")
         
-        result = self.app.get("/answer/test11/0/ly")
+        result = self.app.get("/test/test11/word/0/answer/ly")
         
         self.assertEqual(result.data, b'{"result": "2 times failed", "previous": []}', "Result Failed")
         
     def test_recurring_result(self):
-        self.app.get("/start/test/1/recurring")
-        self.app.get("/answer/test11/0/j")
-        self.app.get("/answer/test11/1/ly")
-        self.app.get("/start/test/1/recurring")
-        result = self.app.get("/answer/test11/0/ly")
+        self.app.get("/test/start/test/1/recurring")
+        self.app.get("/test/test11/word/0/answer/j")
+        self.app.get("/test/test11/word/1/answer/ly")
+        self.app.get("/test/start/test/1/recurring")
+        result = self.app.get("/test/test11/word/0/answer/ly")
         
         self.assertEqual(result.data, b'{"result": "0 times failed", "previous": ["1 times failed"]}', "Result Failed")
 
     def test_error_word(self):
-        result = self.app.get("/word/test21/1")
+        result = self.app.get("/test/test21/word/1")
 
         self.assertEqual(result.data, b'{"error": "Failed to load test"}')
 
     def test_error_answer(self):
-        result = self.app.get("/answer/test21/1/j")
+        result = self.app.get("/test/test21/word/1/answer/j")
 
         self.assertEqual(result.data, b'{"error": "Failed to load test"}')
 

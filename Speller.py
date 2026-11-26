@@ -31,7 +31,7 @@ def get_JQuery(jsFile):
         html = f.read()
     return html
 
-@app.route("/count")
+@app.route("/dictionary/count")
 def show_list():
     return dictionary.get_count()
 
@@ -48,7 +48,7 @@ def dictionary_remove(word):
     dictionary.delete_word(word)
     return get_dictionary()
     
-@app.route("/start/<name>/<count>/<test_type>")
+@app.route("/test/start/<name>/<count>/<test_type>")
 def start_test(name, count, test_type):
     words = dictionary.get_words()
     if out_of_range(words, count):
@@ -59,7 +59,7 @@ def start_test(name, count, test_type):
     Io.write_file(test_id, test_words)
     return get_word_at(test_words, test_id, 0)
 
-@app.route("/word/<test_id>/<num>")
+@app.route("/test/<test_id>/word/<num>")
 def word(test_id, num):
     try:
         test_words = Io.load_file(test_id)
@@ -72,7 +72,7 @@ def word(test_id, num):
         return get_word_at(test_words, test_id, n)
     return json.dumps({"error": "You found a bug!"})
 
-@app.route("/answer/<test_id>/<num>/<answer>")
+@app.route("/test/<test_id>/word/<num>/answer/<answer>")
 def answer(test_id, num, answer):
     try:
         test_words = Io.load_file(test_id)

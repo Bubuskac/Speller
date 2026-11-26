@@ -30,7 +30,7 @@
             var id = "";
             var current = 0;
             function loadCount() {
-                $.getJSON("/count", "", function (json) {
+                $.getJSON("/dictionary/count", "", function (json) {
                     $("#counter").html(json.count);
                 });
                 $("#test").hide();
@@ -41,7 +41,7 @@
             }
             
             function next(num) {
-                $.getJSON("/word/" + id + "/" + num, "", function (json) {
+                $.getJSON("/test/" + id + "/word/" + num, "", function (json) {
                     if (json.error) {
                         alert(json.error);
                         loadCount();
@@ -52,7 +52,7 @@
             }
 
             function answer(answer) {
-                $.getJSON("/answer/" + id + "/" + current + "/" + answer, "", function (json) {
+                $.getJSON("/test/" + id + "/word/" + current + "/answer/" + answer, "", function (json) {
                     if (json.error) {
                         alert(json.error);
                         loadCount();
@@ -86,7 +86,7 @@
                 data.name = $('#name').val();
                 data.count = $('#count').val();
                 data.type = $("#normal").prop('checked') ? 'normal' : 'recurring'
-                $.getJSON("/start/" + data.name + "/" + data.count + "/" + data.type, "", function (json) {
+                $.getJSON("/test/start/" + data.name + "/" + data.count + "/" + data.type, "", function (json) {
                     if (json.word) {
                         $("#word").html(json.word);
                         id = json.id;
